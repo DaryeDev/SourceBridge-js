@@ -1,0 +1,24 @@
+{
+  "name": "sourcebridge",
+  "version": "1.0.0",
+  "description": "Send commands to Source Games.",
+  "main": "sourceBridge.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "valve",
+    "portal",
+    "portal2",
+    "source",
+    "tf2",
+    "teamfortress2",
+    "garrysmod"
+  ],
+  "author": "Darye",
+  "license": "MIT",
+  "dependencies": {
+    "ps-list": "^8.1.1",
+    "telnet-client": "^2.2.2"
+  }
+}
