@@ -17,6 +17,16 @@ class SourceBridge {
         this.eventListeners = {};
     }
 
+    gameVersions = {
+        garrysmod: 'GarrysMod',
+        tf2: 'Team Fortress 2',
+        portal2: 'Portal 2',
+        portal: 'Portal',
+        cstrike: 'Counter-Strike Source',
+        csgo: 'Counter-Strike Global Offensive',
+        hl2: 'Half-Life 2'
+    }
+
     getExecutablePath(pid) {
         try {
             const command = `wmic process where processid=${pid} get ExecutablePath /value`;
@@ -68,12 +78,19 @@ class SourceBridge {
                 await this.tn.connect({
                     host: '127.0.0.1',
                     port: 2121,
-                    // negotiationMandatory: false
+                    negotiationMandatory: false
                 });
 
-                // await this.tn.exec("status", (err, response) => {
-                //     console.log(response)
-                // })
+                await this.tn.send("version\n")
+                await this.tn.nextData()
+                var a = await this.tn.nextData()
+                const aTrimmed = a.slice(0, -2);
+                const versionMatch = aTrimmed.match(/\((.+)\)$/);
+                var gameName = versionMatch ? versionMatch[1] : undefined;
+
+                if (gameName) {
+                    gameName = this.gameVersions[gameName.toLowerCase()] || gameName;
+                }
 
                 
                 this.tn.on('close', () => {
@@ -88,7 +105,7 @@ class SourceBridge {
                 this.verbose && console.log("Connected to compatible Source game! (NetCon)");
 
                 if (this.eventListeners['connect']) {
-                    this.eventListeners['connect'].forEach(callback => callback(undefined, "netcon"));
+                    this.eventListeners['connect'].forEach(callback => callback(gameName, "netcon"));
                 }
 
                 return true;
@@ -97,15 +114,7 @@ class SourceBridge {
 
                 try {
                     const gameExecs = ["hl2.exe", "csgo.exe", "portal2.exe"];
-                    const modDirs = {
-                        GarrysMod: "garrysmod",
-                        "Team Fortress 2": "tf2",
-                        "Portal 2": "portal2",
-                        Portal: "portal",
-                        "Counter-Strike Source": "cstrike",
-                        "Counter-Strike Global Offensive": "csgo",
-                        "Half-Life 2": "hl2",
-                    };
+                    const modDirs = Object.fromEntries(Object.entries(this.gameVersions).map(([key, value]) => [value, key]));
 
                     const processes = await psList();
 
